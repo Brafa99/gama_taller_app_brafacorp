@@ -57,10 +57,9 @@ class _SplashScreenState extends State<SplashScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: theme.cardColor,
+                      border: Border.all(color: theme.primaryColor, width: 2),
                       boxShadow: [
                         BoxShadow(
                           color: theme.primaryColor.withOpacity(0.5),
@@ -69,7 +68,14 @@ class _SplashScreenState extends State<SplashScreen> {
                         )
                       ],
                     ),
-                    child: Image.asset('assets/gama_splash.png', width: 140),
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/gama_icon.jpeg', // 👈 Nuevo logotipo oficial
+                        width: 140,
+                        height: 140,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 30),
                   Text(

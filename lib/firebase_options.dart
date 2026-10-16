@@ -51,11 +51,11 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBSoCf3F_MpD3_iCeUmWNJj9oM30QvdESs',
-    appId: '1:942760936697:android:0295430d06c83ca3bf0e28',
-    messagingSenderId: '942760936697',
-    projectId: 'gama-taller-app',
-    storageBucket: 'gama-taller-app.firebasestorage.app',
+    apiKey: 'AIzaSyDBobGo5XSC3eZ9zV4UMe2_eeGsNQNaxuc',
+    appId: '1:752154816529:android:0196a6361e55c6b0f601b0',
+    messagingSenderId: '752154816529',
+    projectId: 'taller-motos-gama-app',
+    storageBucket: 'taller-motos-gama-app.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(

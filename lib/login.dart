@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:taller_gama/app_theme.dart';
 import 'package:taller_gama/home.dart';
 
-
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -48,7 +47,7 @@ class _LoginPageState extends State<LoginPage> {
         if (!mounted) return;
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => HomeScreen()),
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
         );
       }
     } on FirebaseAuthException catch (e) {
@@ -135,7 +134,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Escuchamos el cambio de tema en tiempo real
     return ValueListenableBuilder<AppThemeModel>(
       valueListenable: currentThemeNotifier,
       builder: (context, theme, child) {
@@ -176,12 +174,11 @@ class _LoginPageState extends State<LoginPage> {
 
                       const SizedBox(height: 10),
 
-                      /// 🔴 LOGO con efecto de brillo futurista
+                      /// 🔴 LOGO NUEVO OFICIAL CON EFECTO DE BRILLO
                       Container(
-                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: theme.cardColor,
+                          border: Border.all(color: theme.primaryColor, width: 2),
                           boxShadow: [
                             BoxShadow(
                               color: theme.primaryColor.withOpacity(0.4),
@@ -190,13 +187,17 @@ class _LoginPageState extends State<LoginPage> {
                             )
                           ],
                         ),
-                        child: Image.asset(
-                          'assets/gama_splash.png',
-                          height: 80,
+                        child: ClipOval(
+                          child: Image.asset(
+                            'assets/gama_icon.jpeg', // 👈 Nuevo logotipo oficial
+                            height: 90,
+                            width: 90,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 15),
 
                       Text(
                         "SISTEMA GAMA",
@@ -208,9 +209,9 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
 
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 25),
 
-                      /// 🧾 CARD LOGIN FUTURISTA CON BORDES BRILLANTES
+                      /// 🧾 CARD LOGIN FUTURISTA
                       Container(
                         padding: const EdgeInsets.all(26),
                         decoration: BoxDecoration(
@@ -333,7 +334,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         onPressed: _isLoading ? null : _login,
         child: _isLoading
-            ? const CircularProgressIndicator(color: Colors.black)
+            : const CircularProgressIndicator(color: Colors.black)
             : const Text(
                 "ACCEDER AL SISTEMA",
                 style: TextStyle(

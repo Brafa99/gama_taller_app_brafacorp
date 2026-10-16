@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "942760936697",
-    "project_id": "gama-taller-app",
-    "storage_bucket": "gama-taller-app.firebasestorage.app"
+    "project_number": "752154816529",
+    "project_id": "taller-motos-gama-app",
+    "storage_bucket": "taller-motos-gama-app.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:942760936697:android:0295430d06c83ca3bf0e28",
+        "mobilesdk_app_id": "1:752154816529:android:0196a6361e55c6b0f601b0",
         "android_client_info": {
           "package_name": "com.example.taller_gama"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBSoCf3F_MpD3_iCeUmWNJj9oM30QvdESs"
+          "current_key": "AIzaSyDBobGo5XSC3eZ9zV4UMe2_eeGsNQNaxuc"
         }
       ],
       "services": {

@@ -7,7 +7,7 @@ const appNew = initializeApp({ credential: cert(serviceAccountNew) }, 'updateAdm
 const dbNew = getFirestore(appNew);
 
 const ID_ANTIGUO = "VVYFjlofNJTjUAKgetOYU3E9II42";
-const ID_NUEVO = "5Lv2doG32baC8Df0LmxocovYi643"; 
+const ID_NUEVO = "6LZHLvgNTCaNE1V4usPywuUvpOs1"; 
 
 async function actualizarAdminId() {
   const coleccionesAfectadas = ['clientes', 'movimientos'];

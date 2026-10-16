@@ -25,15 +25,16 @@ class AppThemeModel {
 class AppThemes {
   static final List<AppThemeModel> themes = [
     // 1. Estilo Verde Oliva Cyber / Militar Neón
-    AppThemeModel(
-      name: "Oliva Cyber",
-      backgroundGradient: [Color(0xFF0B120C), Color(0xFF142217), Color(0xFF070D08)],
-      cardColor: Color(0xFF16251A),
-      primaryColor: Color(0xFF39FF14), // Verde neón
-      accentColor: Color(0xFF76FF03),
+     AppThemeModel(
+      name: "Titanium Dark",
+      backgroundGradient: [Color(0xFF121212), Color(0xFF1E1E1E), Color(0xFF0A0A0A)],
+      cardColor: Color(0xFF1A1A1A),
+      primaryColor: Color(0xFFE0E0E0), // Plata neón
+      accentColor: Color(0xFFBDBDBD),
       textColor: Colors.white,
-      borderColor: Color(0xFF39FF14),
+      borderColor: Color(0xFF757575),
     ),
+  
     // 2. Estilo Ciberpunk Magenta / Violeta
     AppThemeModel(
       name: "Cyber Magenta",
@@ -65,14 +66,14 @@ class AppThemes {
       borderColor: Color(0xFFFF6D00),
     ),
     // 5. Estilo Monocromático Titanio (Elegante Oscuro)
-    AppThemeModel(
-      name: "Titanium Dark",
-      backgroundGradient: [Color(0xFF121212), Color(0xFF1E1E1E), Color(0xFF0A0A0A)],
-      cardColor: Color(0xFF1A1A1A),
-      primaryColor: Color(0xFFE0E0E0), // Plata neón
-      accentColor: Color(0xFFBDBDBD),
+     AppThemeModel(
+      name: "Oliva Cyber",
+      backgroundGradient: [Color(0xFF0B120C), Color(0xFF142217), Color(0xFF070D08)],
+      cardColor: Color(0xFF16251A),
+      primaryColor: Color(0xFF39FF14), // Verde neón
+      accentColor: Color(0xFF76FF03),
       textColor: Colors.white,
-      borderColor: Color(0xFF757575),
+      borderColor: Color(0xFF39FF14),
     ),
   ];
 }

@@ -60,12 +60,10 @@ dev_dependencies:
 
   flutter_lints: ^5.0.0
 
-flutter_launcher_icons:
+flutter_icons:
   android: true
   ios: true
-  image_path: "assets/gama2.png"
-  adaptive_icon_background: "#ffffff"   # color de fondo (puedes poner transparente o el color de tu marca)
-  adaptive_icon_foreground: "assets/gama2.png"
+  image_path: "assets/gama_icon.jpeg"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
