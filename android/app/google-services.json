@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "942760936697",
+    "project_id": "gama-taller-app",
+    "storage_bucket": "gama-taller-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:942760936697:android:0295430d06c83ca3bf0e28",
+        "android_client_info": {
+          "package_name": "com.example.taller_gama"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSoCf3F_MpD3_iCeUmWNJj9oM30QvdESs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
