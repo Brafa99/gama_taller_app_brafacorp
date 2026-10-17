@@ -175,24 +175,30 @@ class _LoginPageState extends State<LoginPage> {
                       const SizedBox(height: 10),
 
                       /// 🔴 LOGO NUEVO OFICIAL CON EFECTO DE BRILLO
+                     /// 🔴 LOGO NUEVO OFICIAL AMPLIADO CON BRILLO NEÓN
                       Container(
+                        width: 110,
+                        height: 110,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: theme.primaryColor, width: 2),
+                          border: Border.all(color: theme.primaryColor, width: 2.5),
                           boxShadow: [
                             BoxShadow(
-                              color: theme.primaryColor.withOpacity(0.4),
-                              blurRadius: 25,
-                              spreadRadius: 5,
+                              color: theme.primaryColor.withOpacity(0.5),
+                              blurRadius: 30,
+                              spreadRadius: 6,
                             )
                           ],
                         ),
                         child: ClipOval(
                           child: Image.asset(
-                            'assets/gama_icon.jpeg', // 👈 Nuevo logotipo oficial
-                            height: 90,
-                            width: 90,
+                            'assets/gama_icon.jpeg',
                             fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Icon(
+                              Icons.motorcycle,
+                              size: 55,
+                              color: theme.primaryColor,
+                            ),
                           ),
                         ),
                       ),
