@@ -168,134 +168,113 @@ class _EditarClienteScreenState extends State<EditarClienteScreen> {
                               const SizedBox(height: 16),
 
                               /// 🔴 LISTADO DE ÓRDENES
-                              StreamBuilder<QuerySnapshot>(
-                                stream: _firestore
-                                    .collection('clientes')
-                                    .doc(widget.clienteId)
-                                    .collection('ordenes')
-                                    .orderBy('fechaCreacion', descending: true)
-                                    .snapshots(),
-                                builder: (context, snapshotOrdenes) {
-                                  if (!snapshotOrdenes.hasData) {
-                                    return Center(
-                                      child: CircularProgressIndicator(color: theme.primaryColor),
-                                    );
-                                  }
+                              /// 🔴 LISTADO DE ÓRDENES Y MOVIMIENTOS DEL CLIENTE
+              /// 🔴 LISTADO DE ÓRDENES Y MOVIMIENTOS DEL CLIENTE
+              StreamBuilder<QuerySnapshot>(
+                stream: _firestore
+                    .collection('clientes')
+                    .doc(widget.clienteId)
+                    .collection('ordenes')
+                    .orderBy('fechaCreacion', descending: true)
+                    .snapshots(),
+                builder: (context, snapshotOrdenes) {
+                  if (snapshotOrdenes.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(color: theme.primaryColor),
+                    );
+                  }
 
-                                  final ordenes = snapshotOrdenes.data!.docs;
+                  if (!snapshotOrdenes.hasData || snapshotOrdenes.data!.docs.isEmpty) {
+                    return Center(
+                      child: Column(
+                        children: [
+                          Lottie.asset(
+                            'assets/lotties/empty.json',
+                            height: 130,
+                          ),
+                          const SizedBox(height: 10),
+                          const Text(
+                            "Este cliente aún no tiene órdenes registradas",
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
 
-                                  if (ordenes.isEmpty) {
-                                    return Center(
-                                      child: Column(
-                                        children: [
-                                          Lottie.asset(
-                                            'assets/lotties/empty.json',
-                                            height: 130,
-                                          ),
-                                          const SizedBox(height: 10),
-                                          const Text(
-                                            "Este cliente aún no tiene órdenes registradas",
-                                            style: TextStyle(color: Colors.white70),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  }
+                  final ordenes = snapshotOrdenes.data!.docs;
 
-                                  return Column(
-                                    children: ordenes.map((doc) {
-                                      final orden = doc.data() as Map<String, dynamic>;
-                                      final montoTotal = (orden['montoTotal'] as num?)?.toDouble() ?? 0;
-                                      final pagos = (orden['pagos'] ?? []) as List;
-                                      double totalPagado = 0;
+                  return Column(
+                    children: ordenes.map((doc) {
+                      final orden = doc.data() as Map<String, dynamic>;
+                      final monto = (orden['monto'] as num?)?.toDouble() ?? 0;
+                      final fecha = (orden['fecha'] as Timestamp?)?.toDate();
+                      final descripcion = orden['descripcion'] ?? 'Sin descripción';
+                      final categoria = orden['categoria'] ?? '';
+                      final tipo = orden['tipo'] ?? 'ingreso';
+                      final bool esIngreso = tipo == 'ingreso';
 
-                                      for (var p in pagos) {
-                                        totalPagado += (p['monto'] as num?)?.toDouble() ?? 0;
-                                      }
-
-                                      double progreso = montoTotal == 0 ? 0 : (totalPagado / montoTotal).clamp(0.0, 1.0);
-
-                                      Color bordeColor;
-                                      if (progreso >= 1) {
-                                        bordeColor = Colors.greenAccent;
-                                      } else if (progreso >= 0.5) {
-                                        bordeColor = Colors.orangeAccent;
-                                      } else {
-                                        bordeColor = theme.primaryColor;
-                                      }
-
-                                      final fecha = (orden['fechaCreacion'] as Timestamp?)?.toDate();
-
-                                      return GestureDetector(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => OrdenDetalleScreen(
-                                                clienteId: widget.clienteId,
-                                                clienteNombre: data['nombre'],
-                                                ordenId: doc.id,
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                        child: Container(
-                                          margin: const EdgeInsets.only(bottom: 16),
-                                          padding: const EdgeInsets.all(18),
-                                          decoration: BoxDecoration(
-                                            color: theme.cardColor,
-                                            borderRadius: BorderRadius.circular(20),
-                                            border: Border.all(
-                                              color: bordeColor,
-                                              width: 1.5,
-                                            ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: bordeColor.withOpacity(0.15),
-                                                blurRadius: 10,
-                                                offset: const Offset(0, 4),
-                                              )
-                                            ],
-                                          ),
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                orden['numeroOrden'] ?? 'ORDEN S/N',
-                                                style: TextStyle(
-                                                  color: theme.primaryColor,
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 6),
-                                              Text(
-                                                orden['descripcion'] ?? '',
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 6),
-                                              if (fecha != null)
-                                                Text(
-                                                  "Fecha: ${fecha.day}/${fecha.month}/${fecha.year}",
-                                                  style: const TextStyle(color: Colors.white54, fontSize: 12),
-                                                ),
-                                              const SizedBox(height: 10),
-                                              Text(
-                                                "Pagado: Bs. $totalPagado  •  Total: Bs. $montoTotal",
-                                                style: const TextStyle(color: Colors.white70, fontSize: 13),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    }).toList(),
-                                  );
-                                },
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: theme.cardColor,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: esIngreso ? Colors.greenAccent : theme.primaryColor,
+                            width: 1.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: (esIngreso ? Colors.greenAccent : theme.primaryColor).withOpacity(0.15),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            )
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              categoria.toUpperCase(),
+                              style: TextStyle(
+                                color: esIngreso ? Colors.greenAccent : theme.primaryColor,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
                               ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              descripcion,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            if (fecha != null)
+                              Text(
+                                "Fecha: ${fecha.day}/${fecha.month}/${fecha.year} - ${fecha.hour}:${fecha.minute.toString().padLeft(2, '0')}",
+                                style: const TextStyle(color: Colors.white54, fontSize: 12),
+                              ),
+                            const SizedBox(height: 10),
+                            Text(
+                              "Monto: Bs. ${monto.toStringAsFixed(2)}",
+                              style: TextStyle(
+                                color: esIngreso ? Colors.greenAccent : theme.primaryColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
+
                             ],
                           ),
                         );

@@ -16,10 +16,10 @@ class _InventarioViewState extends State<InventarioView> {
   final uid = FirebaseAuth.instance.currentUser!.uid;
 
   final categorias = [
-    {"nombre": "Aceites y Lubricantes", "key": "aceites", "imagen": "assets/aceite2.png"},
-    {"nombre": "Motor", "key": "motores", "imagen": "assets/motor.png"},
+    {"nombre": "Aceites y Lubricantes", "key": "aceites", "imagen": "assets/aceite3.png"},
+    {"nombre": "Motor", "key": "motores", "imagen": "assets/motor2.png"},
     {"nombre": "Sistema Eléctrico", "key": "electricos", "imagen": "assets/electrico.png"},
-    {"nombre": "Accesorios", "key": "accesorios", "imagen": "assets/accesorios.png"},
+    {"nombre": "Accesorios", "key": "accesorios", "imagen": "assets/accesorio2.png"},
   ];
 
   Future<Map<String, dynamic>> _calcularMetricas() async {

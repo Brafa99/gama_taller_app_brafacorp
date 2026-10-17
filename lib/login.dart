@@ -334,7 +334,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         onPressed: _isLoading ? null : _login,
         child: _isLoading
-            : const CircularProgressIndicator(color: Colors.black)
+            ? const CircularProgressIndicator(color: Colors.black)
             : const Text(
                 "ACCEDER AL SISTEMA",
                 style: TextStyle(
