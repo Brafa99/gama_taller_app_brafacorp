@@ -1,4 +1,38 @@
-- name: Reparar estructura Android, inyectar ícono oficial y generar launcher
+name: Build Gama Taller APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Configurar Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Pre-configurar SDK y licencias de Android
+        run: |
+          yes "y" | sdkmanager --licenses || true
+          sdkmanager --install "ndk;25.2.9519653" || true
+
+      - name: Reparar estructura Android, inyectar ícono oficial y generar launcher
         run: |
           cp android/app/google-services.json ./google-services.json.bak
           if [ -f "assets/gama_icon.jpeg" ]; then cp assets/gama_icon.jpeg ./gama_icon.jpeg.bak; fi
@@ -12,7 +46,6 @@
             mv ./gama_icon.jpeg.bak assets/gama_icon.jpeg
           fi
 
-          # Asegurar dependencias de iconos y ejecutarlas en el servidor
           flutter pub add flutter_launcher_icons || true
           flutter pub run flutter_launcher_icons || true
 
@@ -27,3 +60,23 @@
           fi
           
           sed -i 's/android:label="taller_gama"/android:label="Gama Taller"/g' android/app/src/main/AndroidManifest.xml || true
+
+      - name: Instalar dependencias y compilar APK
+        run: |
+          flutter pub get
+          flutter build apk --release --no-tree-shake-icons
+
+      - name: Guardar GamaTaller.apk directamente en la raíz del repo
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk ./GamaTaller.apk
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f ./GamaTaller.apk
+          git commit -m "📲 APK compilado automáticamente [skip ci]" || echo "Sin cambios en el APK"
+          git push
+
+      - name: Subir también a Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: GamaTaller-APK
+          path: ./GamaTaller.apk
