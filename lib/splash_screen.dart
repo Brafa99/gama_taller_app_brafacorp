@@ -57,23 +57,28 @@ class _SplashScreenState extends State<SplashScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
+                    width: 160,
+                    height: 160,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: theme.primaryColor, width: 2),
+                      border: Border.all(color: theme.primaryColor, width: 3),
                       boxShadow: [
                         BoxShadow(
-                          color: theme.primaryColor.withOpacity(0.5),
-                          blurRadius: 30,
-                          spreadRadius: 8,
+                          color: theme.primaryColor.withOpacity(0.6),
+                          blurRadius: 35,
+                          spreadRadius: 10,
                         )
                       ],
                     ),
                     child: ClipOval(
                       child: Image.asset(
-                        'assets/gama_icon.jpeg', // 👈 Nuevo logotipo oficial
-                        width: 140,
-                        height: 140,
+                        'assets/gama_icon.jpeg',
                         fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Icon(
+                          Icons.motorcycle,
+                          size: 80,
+                          color: theme.primaryColor,
+                        ),
                       ),
                     ),
                   ),
