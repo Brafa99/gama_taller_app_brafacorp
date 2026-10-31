@@ -59,7 +59,7 @@ jobs:
             sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 23/g' android/app/build.gradle
           fi
           
-          sed -i 's/android:label="taller_gama"/android:label="Gama Taller"/g' android/app/src/main/AndroidManifest.xml || true
+          sed -i 's/android:label="GAMA"/android:label="GAMA"/g' android/app/src/main/AndroidManifest.xml || true
 
       - name: Instalar dependencias y compilar APK android
         run: |
