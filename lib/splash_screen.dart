@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
     }
 
     // 2. Esperar 2 segundos adicionales (4 segundos en total) antes de validar sesión y navegar
-    await Future.delayed(const Duration(seconds: 1.5));
+    await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
 
     final user = FirebaseAuth.instance.currentUser;
@@ -125,8 +125,6 @@ class _SplashScreenState extends State<SplashScreen> {
                             letterSpacing: 2.5,
                             fontWeight: FontWeight.w600,
                           ),
-                        ),
-                        
                         ),
                       ],
                     ),
