@@ -4,7 +4,6 @@ import 'package:taller_gama/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
 class RecordatoriosScreen extends StatefulWidget {
   const RecordatoriosScreen({super.key});
 
@@ -14,15 +13,19 @@ class RecordatoriosScreen extends StatefulWidget {
 
 class _RecordatoriosScreenState extends State<RecordatoriosScreen>
     with SingleTickerProviderStateMixin {
-  final user = FirebaseAuth.instance.currentUser;
   final _firestore = FirebaseFirestore.instance;
-
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _abrirWhatsApp(String numero, String mensaje) async {
@@ -78,6 +81,8 @@ _Gracias por tu confianza._
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
     return ValueListenableBuilder<AppThemeModel>(
       valueListenable: currentThemeNotifier,
       builder: (context, theme, child) {
@@ -138,29 +143,45 @@ _Gracias por tu confianza._
                   ),
 
                   Expanded(
-                    child: StreamBuilder<QuerySnapshot>(
-                      stream: _firestore
-                          .collection('clientes')
-                          .where('adminId', isEqualTo: user!.uid)
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return Center(
-                            child: CircularProgressIndicator(color: theme.primaryColor),
-                          );
-                        }
+                    child: user == null
+                        ? Center(
+                            child: Text(
+                              "Usuario no autenticado",
+                              style: TextStyle(color: theme.textColor),
+                            ),
+                          )
+                        : StreamBuilder<QuerySnapshot>(
+                            stream: _firestore
+                                .collection('clientes')
+                                .where('adminId', isEqualTo: user.uid)
+                                .snapshots(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return Center(
+                                  child: CircularProgressIndicator(color: theme.primaryColor),
+                                );
+                              }
 
-                        final clientes = snapshot.data!.docs;
+                              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                                return const Center(
+                                  child: Text(
+                                    "No hay clientes registrados",
+                                    style: TextStyle(color: Colors.white70, fontSize: 15),
+                                  ),
+                                );
+                              }
 
-                        return TabBarView(
-                          controller: _tabController,
-                          children: [
-                            _buildLista(clientes, true, theme),
-                            _buildLista(clientes, false, theme),
-                          ],
-                        );
-                      },
-                    ),
+                              final clientes = snapshot.data!.docs;
+
+                              return TabBarView(
+                                controller: _tabController,
+                                children: [
+                                  _buildLista(clientes, true, theme),
+                                  _buildLista(clientes, false, theme),
+                                ],
+                              );
+                            },
+                          ),
                   ),
                 ],
               ),
