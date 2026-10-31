@@ -61,7 +61,7 @@ jobs:
           
           sed -i 's/android:label="taller_gama"/android:label="Gama Taller"/g' android/app/src/main/AndroidManifest.xml || true
 
-      - name: Instalar dependencias y compilar APK
+      - name: Instalar dependencias y compilar APK android
         run: |
           flutter pub get
           flutter build apk --release --no-tree-shake-icons
