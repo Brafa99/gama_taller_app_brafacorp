@@ -37,6 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
       await docRef.set({
         'nombre_taller': 'TALLER GAMA',
         'subtitulo': 'Panel Administrativo',
+        'imagen_moto': 'assets/moto_futurista.png',
       });
     }
   }
@@ -108,6 +109,84 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 );
               }),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Modal para seleccionar y cambiar la imagen de la moto del Home
+  void _mostrarSelectorImagenMoto(AppThemeModel theme) {
+    final List<String> imagenesDisponibles = [
+      'assets/moto_futurista.png',
+      'assets/gama_icon.jpeg',
+      'assets/motor.png',
+      'assets/aceite2.png',
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: theme.cardColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Seleccionar Imagen Principal",
+                style: TextStyle(
+                  color: theme.textColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 15),
+              SizedBox(
+                height: 110,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: imagenesDisponibles.length,
+                  itemBuilder: (context, index) {
+                    final imgPath = imagenesDisponibles[index];
+                    return GestureDetector(
+                      onTap: () async {
+                        final currentUser = FirebaseAuth.instance.currentUser;
+                        if (currentUser != null) {
+                          await FirebaseFirestore.instance
+                              .collection('configuracion_taller')
+                              .doc(currentUser.uid)
+                              .set({
+                            'imagen_moto': imgPath,
+                          }, SetOptions(merge: true));
+                        }
+                        if (mounted) Navigator.pop(context);
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 14),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: theme.primaryColor, width: 2),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: Image.asset(
+                            imgPath,
+                            width: 90,
+                            height: 90,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
             ],
           ),
         );
@@ -250,11 +329,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       builder: (context, snapshot) {
                         String nombreTaller = "TALLER GAMA";
                         String subtitulo = "Panel Administrativo";
+                        String imagenMoto = "assets/moto_futurista.png";
 
                         if (snapshot.hasData && snapshot.data!.exists) {
                           final data = snapshot.data!.data() as Map<String, dynamic>;
                           nombreTaller = data['nombre_taller'] ?? "TALLER GAMA";
                           subtitulo = data['subtitulo'] ?? "Panel Administrativo";
+                          imagenMoto = data['imagen_moto'] ?? "assets/moto_futurista.png";
                         }
 
                         return Container(
@@ -335,31 +416,52 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                               const SizedBox(width: 10),
-                              // Imagen de la Moto Futurista
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: theme.primaryColor.withOpacity(0.4),
-                                      blurRadius: 15,
-                                      spreadRadius: 2,
-                                    )
-                                  ],
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: Image.asset(
-                                    'assets/moto_futurista.png',
-                                    height: 95,
-                                    width: 95,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) => Icon(
-                                      Icons.motorcycle,
-                                      size: 60,
-                                      color: theme.primaryColor,
+                              // Imagen de la Moto Futurista Interactiva (Cambiar al tocar)
+                              GestureDetector(
+                                onTap: () => _mostrarSelectorImagenMoto(theme),
+                                child: Stack(
+                                  alignment: Alignment.topRight,
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(16),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: theme.primaryColor.withOpacity(0.4),
+                                            blurRadius: 15,
+                                            spreadRadius: 2,
+                                          )
+                                        ],
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(16),
+                                        child: Image.asset(
+                                          imagenMoto,
+                                          height: 95,
+                                          width: 95,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) => Icon(
+                                            Icons.motorcycle,
+                                            size: 60,
+                                            color: theme.primaryColor,
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                    Positioned(
+                                      top: 4,
+                                      right: 4,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black54,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(color: theme.primaryColor, width: 1),
+                                        ),
+                                        child: Icon(Icons.edit, size: 12, color: theme.primaryColor),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
