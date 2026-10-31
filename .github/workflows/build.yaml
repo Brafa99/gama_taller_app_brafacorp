@@ -59,7 +59,7 @@ jobs:
             sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 23/g' android/app/build.gradle
           fi
           
-          sed -i 's/android:label="GAMA"/android:label="GAMA"/g' android/app/src/main/AndroidManifest.xml || true
+          sed -i 's/android:label="Gama"/android:label="Gama"/g' android/app/src/main/AndroidManifest.xml || true
 
       - name: Instalar dependencias y compilar APK android
         run: |
@@ -68,10 +68,10 @@ jobs:
 
       - name: Guardar GamaTaller.apk directamente en la raíz del repo
         run: |
-          cp build/app/outputs/flutter-apk/app-release.apk ./GamaTaller.apk
+          cp build/app/outputs/flutter-apk/app-release.apk ./Gama.apk
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add -f ./GamaTaller.apk
+          git add -f ./Gama.apk
           git commit -m "📲 APK compilado automáticamente [skip ci]" || echo "Sin cambios en el APK"
           git push
 
