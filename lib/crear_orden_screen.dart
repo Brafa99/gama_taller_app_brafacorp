@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:lottie/lottie.dart';
 import 'package:taller_gama/app_theme.dart';
 
-
 class CrearOrdenScreen extends StatefulWidget {
   final String clienteId;
   final String clienteNombre;
@@ -39,15 +38,14 @@ class _CrearOrdenScreenState extends State<CrearOrdenScreen> {
       final montoTotal = double.parse(_montoCtrl.text);
       final pagoInicial = double.tryParse(_pagoInicialCtrl.text) ?? 0;
 
-      final ordenesRef = _firestore
-          .collection('clientes')
-          .doc(widget.clienteId)
-          .collection('ordenes');
+      final clienteRef = _firestore.collection('clientes').doc(widget.clienteId);
+      final ordenesRef = clienteRef.collection('ordenes');
 
       final snapshot = await ordenesRef.get();
       final numero = snapshot.docs.length + 1;
       final numeroOrden = "OT-${numero.toString().padLeft(3, '0')}";
 
+      // 1. Crear la orden en la subcolección
       final nuevaOrden = await ordenesRef.add({
         'numeroOrden': numeroOrden,
         'descripcion': _descripcionCtrl.text.trim(),
@@ -64,6 +62,28 @@ class _CrearOrdenScreenState extends State<CrearOrdenScreen> {
             : [],
       });
 
+      // 2. SCRUM / SINCRONIZACIÓN: Actualizar el documento principal del cliente
+      // para que el módulo de recordatorios detecte el monto y los pagos pendientes
+      final clienteSnap = await clienteRef.get();
+      final clienteData = clienteSnap.data() as Map<String, dynamic>? ?? {};
+      final pagosAnteriores = List.from(clienteData['pagos'] ?? []);
+      
+      if (pagoInicial > 0) {
+        pagosAnteriores.add({
+          'monto': pagoInicial,
+          'fecha': Timestamp.now(),
+        });
+      }
+
+      final montoAnterior = (clienteData['montoEstimado'] as num?)?.toDouble() ?? 0;
+
+      await clienteRef.update({
+        'montoEstimado': montoAnterior + montoTotal,
+        'pagos': pagosAnteriores,
+        'pagado': false,
+      });
+
+      // 3. Registrar el movimiento financiero global
       if (pagoInicial > 0) {
         await _firestore.collection('movimientos').add({
           'adminId': user!.uid,
@@ -128,7 +148,6 @@ class _CrearOrdenScreenState extends State<CrearOrdenScreen> {
             child: SafeArea(
               child: Column(
                 children: [
-                  /// 🛡️ APPBAR
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     child: Row(
