@@ -176,8 +176,8 @@ _Gracias por tu confianza._
                               return TabBarView(
                                 controller: _tabController,
                                 children: [
-                                  _buildLista(clientes, true, theme),
-                                  _buildLista(clientes, false, theme),
+                                  _ClientesListaRecordatorio(clientes: clientes, soloPendientes: true, theme: theme, abrirWhatsApp: _abrirWhatsApp, generarMensaje: generarMensajeProfesional),
+                                  _ClientesListaRecordatorio(clientes: clientes, soloPendientes: false, theme: theme, abrirWhatsApp: _abrirWhatsApp, generarMensaje: generarMensajeProfesional),
                                 ],
                               );
                             },
@@ -191,106 +191,155 @@ _Gracias por tu confianza._
       },
     );
   }
+}
 
-  Widget _buildLista(List<QueryDocumentSnapshot> clientes, bool soloPendientes, AppThemeModel theme) {
-    List<Widget> items = [];
+/// Widget auxiliar para evaluar dinámicamente las órdenes de cada cliente en tiempo real
+class _ClientesListaRecordatorio extends StatelessWidget {
+  final List<QueryDocumentSnapshot> clientes;
+  final bool soloPendientes;
+  final AppThemeModel theme;
+  final Function(String, String) abrirWhatsApp;
+  final Function({required String nombre, required String servicio, required String numeroOrden, required double saldo, required int diasVencido}) generarMensaje;
 
-    for (var cliente in clientes) {
-      final data = cliente.data() as Map<String, dynamic>;
-      final nombre = data['nombre'] ?? '';
-      final celular = data['celular'] ?? '';
+  const _ClientesListaRecordatorio({
+    required this.clientes,
+    required this.soloPendientes,
+    required this.theme,
+    required this.abrirWhatsApp,
+    required this.generarMensaje,
+  });
 
-      final pagos = (data['pagos'] ?? []) as List;
-      final totalPagos = pagos.fold<double>(
-          0, (s, p) => s + ((p['monto'] as num?)?.toDouble() ?? 0));
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      itemCount: clientes.length,
+      itemBuilder: (context, index) {
+        final clienteDoc = clientes[index];
+        final clienteData = clienteDoc.data() as Map<String, dynamic>;
+        final nombre = clienteData['nombre'] ?? '';
+        final celular = clienteData['celular'] ?? '';
 
-      final montoEstimado = (data['montoEstimado'] as num?)?.toDouble() ?? 0;
-      final saldo = ((montoEstimado - totalPagos).clamp(0, double.infinity)).toDouble();
-      final pendiente = saldo > 0 && data['pagado'] != true;
+        return StreamBuilder<QuerySnapshot>(
+          stream: clienteDoc.reference.collection('ordenes').snapshots(),
+          builder: (context, ordenesSnap) {
+            if (!ordenesSnap.hasData) {
+              return const SizedBox.shrink();
+            }
 
-      if (soloPendientes && !pendiente) continue;
+            final ordenes = ordenesSnap.data!.docs;
+            double totalEstimado = 0;
+            double totalPagado = 0;
 
-      items.add(
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: theme.cardColor,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: theme.borderColor.withOpacity(0.3)),
-            boxShadow: [
-              BoxShadow(
-                color: theme.primaryColor.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              )
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                nombre,
-                style: TextStyle(
-                  color: theme.textColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
+            for (var orden in ordenes) {
+              final dataOrden = orden.data() as Map<String, dynamic>;
+              final monto = (dataOrden['montoTotal'] as num?)?.toDouble() ?? 0;
+              final pagos = List.from(dataOrden['pagos'] ?? []);
+              double pagadoOrden = 0;
+
+              for (var p in pagos) {
+                pagadoOrden += (p['monto'] as num?)?.toDouble() ?? 0;
+              }
+
+              totalEstimado += monto;
+              totalPagado += pagadoOrden;
+            }
+
+            final saldo = ((totalEstimado - totalPagado).clamp(0, double.infinity)).toDouble();
+            final bool estaPagado = totalEstimado > 0 && totalPagado >= totalEstimado;
+
+            if (soloPendientes && estaPagado) {
+              return const SizedBox.shrink(); // Omitir si se piden solo pendientes y ya está pagado
+            }
+
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: theme.cardColor,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: theme.borderColor.withOpacity(0.3)),
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.primaryColor.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ],
               ),
-              const SizedBox(height: 6),
-              Text(
-                "Saldo: Bs ${saldo.toStringAsFixed(2)}",
-                style: const TextStyle(
-                  color: Colors.greenAccent,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 14),
-              Align(
-                alignment: Alignment.centerRight,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        nombre,
+                        style: TextStyle(
+                          color: theme.textColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: estaPagado ? Colors.green : theme.primaryColor,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          estaPagado ? 'PAGADO' : 'PENDIENTE',
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    "Saldo pendiente: Bs ${saldo.toStringAsFixed(2)}",
+                    style: TextStyle(
+                      color: estaPagado ? Colors.greenAccent : Colors.orangeAccent,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
                     ),
                   ),
-                  icon: const Icon(Icons.send, color: Colors.black, size: 18),
-                  label: const Text(
-                    "Enviar WhatsApp",
-                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-                  ),
-                  onPressed: () {
-                    final mensaje = generarMensajeProfesional(
-                      nombre: nombre,
-                      servicio: "Servicio de Taller",
-                      numeroOrden: "S/N",
-                      saldo: saldo,
-                      diasVencido: 0,
-                    );
-                    _abrirWhatsApp('+591$celular', mensaje);
-                  },
-                ),
-              )
-            ],
-          ),
-        ),
-      );
-    }
-
-    if (items.isEmpty) {
-      return const Center(
-        child: Text(
-          "No hay registros disponibles",
-          style: TextStyle(color: Colors.white70, fontSize: 15),
-        ),
-      );
-    }
-
-    return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      children: items,
+                  const SizedBox(height: 14),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      icon: const Icon(Icons.send, color: Colors.black, size: 18),
+                      label: const Text(
+                        "Enviar WhatsApp",
+                        style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: () {
+                        final mensaje = generarMensaje(
+                          nombre: nombre,
+                          servicio: "Servicio de Taller",
+                          numeroOrden: "General",
+                          saldo: saldo,
+                          diasVencido: 0,
+                        );
+                        abrirWhatsApp('+591$celular', mensaje);
+                      },
+                    ),
+                  )
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
