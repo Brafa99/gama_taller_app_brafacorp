@@ -54,6 +54,7 @@ class _OrdenDetalleScreenState extends State<OrdenDetalleScreen> {
               final monto = double.tryParse(montoCtrl.text);
               if (monto == null || monto <= 0) return;
 
+              // 1. Actualizar pagos en la orden específica
               await orden.reference.update({
                 'pagos': FieldValue.arrayUnion([
                   {
@@ -63,6 +64,19 @@ class _OrdenDetalleScreenState extends State<OrdenDetalleScreen> {
                 ])
               });
 
+              // 2. SINCRONIZACIÓN: Agregar también el pago al documento principal del cliente
+              // para que el saldo y recordatorios se actualicen correctamente
+              final clienteRef = _firestore.collection('clientes').doc(widget.clienteId);
+              await clienteRef.update({
+                'pagos': FieldValue.arrayUnion([
+                  {
+                    'monto': monto,
+                    'fecha': Timestamp.now(),
+                  }
+                ])
+              });
+
+              // 3. Registrar el movimiento financiero global
               await _firestore.collection('movimientos').add({
                 'adminId': user!.uid,
                 'tipo': 'ingreso',
@@ -107,7 +121,6 @@ class _OrdenDetalleScreenState extends State<OrdenDetalleScreen> {
             child: SafeArea(
               child: Column(
                 children: [
-                  /// 🛡️ APPBAR
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     child: Row(
